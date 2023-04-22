@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <title>Document</title>
+</head>
+<body>
+  <header>   
+    <h1>Rest API</h1>
+    <nav>   
+        <ul>
+            <li><a href="customers.html">Home</a></li>
+            <li><a href="login.html">Login</a></li>
+            <li><a href="register.html">Register</a></li>        
+        </ul>
+    </nav>
+</header>
+    <section class="vh-100">
+        <div class="container py-5 h-100">
+          <div class="row justify-content-center align-items-center h-100">
+            <div class="col col-xl-7">
+              <div class="card" style="border-radius: 1rem;">
+                <div class="row g-0">
+                  <div class="col-md-6 col-lg-12 d-flex align-items-center">
+                    <div class="card-body p-4 p-lg-5 text-black">  
+                      <form  id="loginform">
+                        <h5 class="fw-normal mb-3 pb-3" style="letter-spacing: 1px;">Sign into your account</h5>
+      
+                        <div class="form-outline mb-4">
+                          <input type="email" name="email" id="email" class="form-control form-control-lg" required/>
+                          <label class="form-label" for="email">Email address</label>
+                        </div>
+      
+                        <div class="form-outline mb-4">
+                          <input type="password" name="password" id="password" class="form-control form-control-lg" required/>
+                          <label class="form-label" for="password">Password</label>
+                        </div>
+      
+                        <div class="pt-1 mb-4">
+                          <button class="btn btn-dark btn-lg btn-block" id="loginbtn" type="button">Login</button>
+                        </div>
+
+                        <div class="pt-1 mb-4" id="errorhide">
+                            <div class="text-danger text-lg btn-block" id="errordiv"></div>
+                          </div>
+      
+                        <a class="small text-muted" href="#!">Forgot password?</a>
+                        <p class="mb-5 pb-lg-2" style="color: #393f81;">Don't have an account? <a href="#!"
+                            style="color: #393f81;">Register here</a></p>
+                        <a href="#!" class="small text-muted">Terms of use.</a>
+                        <a href="#!" class="small text-muted">Privacy policy</a>
+                      </form>
+      
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+</body>
+<script>
+    $(document).ready(function(){
+        $('#errorhide').hide();
+        $('#loginbtn').click(function(){
+
+            if($('#email').val() != "" && $('#password').val() != "") {
+            var uemail = $('#email').val();
+            var upass = $('#password').val();
+        
+        
+                var toSend = {
+                   name:"generateToken",
+                   param: {
+                    email:uemail,
+                    pass:upass
+                   }
+                  
+                }
+
+                var formdata= JSON.stringify(toSend);
+               // console.log(formdata);
+                $.ajax({                           
+                    url:"http://localhost/jwt-api/",
+                    type:'POST',
+                    data:formdata,
+                    contentType:'application/json',
+                    success:function(result){
+                        if(result['response']['status'] != '200'){
+                            $('#errorhide').show();
+                            $('#errordiv').html(result['response']['message']);
+                            
+                        }else {
+                          setCookie('jwt',result['response']['message']['token'],1);
+                          showhomepage();
+                        }
+                    }
+                });
+            } else {
+                $('#errorhide').show();
+                $('#errordiv').html('Please enter email and password');
+            }
+        });
+    });
+
+    function setCookie(name, value, daysToLive) {
+    // Encode value in order to escape semicolons, commas, and whitespace
+    var cookie = name + "=" + encodeURIComponent(value);
+    
+    if(typeof daysToLive === "number") {
+        /* Sets the max-age attribute so that the cookie expires
+        after the specified number of days */
+        cookie += "; max-age=" + (daysToLive*24*60*60);
+        
+        document.cookie = cookie;
+    }
+}
+
+function getCookie(name) {
+    // Split cookie string and get all individual name=value pairs in an array
+    var cookieArr = document.cookie.split(";");
+    
+    // Loop through the array elements
+    for(var i = 0; i < cookieArr.length; i++) {
+        var cookiePair = cookieArr[i].split("=");
+        
+        /* Removing whitespace at the beginning of the cookie name
+        and compare it with the given string */
+        if(name == cookiePair[0].trim()) {
+            // Decode the cookie value and return
+            return decodeURIComponent(cookiePair[1]);
+        }
+    }   
+    // Return null if not found
+    return null;
+}
+
+function showhomepage(){
+
+ var jwt=getCookie('jwt');
+ $.post("http://localhost/jwt-api/",JSON.stringify({jwt:jwt}))
+ .done(function(result){
+   window.location.href = 'customers.html';
+ })
+ .fail(function(result){
+  window.location.href = 'zia2.html';
+ })
+
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</html>
